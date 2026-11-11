@@ -1,0 +1,97 @@
+const int MOTOR1_EN  = 2;
+const int MOTOR1_STP = 3;
+const int MOTOR1_DIR = 4;
+
+const int MOTOR2_EN  = 5;
+const int MOTOR2_STP = 6;
+const int MOTOR2_DIR = 7;
+
+// 1.8도 스텝모터, MStep = 16 기준
+const int PULSES_90 = 800;
+
+// 펄스 HIGH/LOW 유지 시간 (us)
+const int PULSE_US = 1500;
+
+void setup() {
+  // 모터 1 초기 설정
+  digitalWrite(MOTOR1_EN, HIGH);
+  digitalWrite(MOTOR1_STP, HIGH);
+  digitalWrite(MOTOR1_DIR, LOW);
+
+  pinMode(MOTOR1_EN, OUTPUT);
+  pinMode(MOTOR1_STP, OUTPUT);
+  pinMode(MOTOR1_DIR, OUTPUT);
+
+  // 모터 2 초기 설정
+  digitalWrite(MOTOR2_EN, HIGH);
+  digitalWrite(MOTOR2_STP, HIGH);
+  digitalWrite(MOTOR2_DIR, LOW);
+
+  pinMode(MOTOR2_EN, OUTPUT);
+  pinMode(MOTOR2_STP, OUTPUT);
+  pinMode(MOTOR2_DIR, OUTPUT);
+
+  Serial.begin(9600);
+
+  // EN = LOW : 모터 활성화
+  digitalWrite(MOTOR1_EN, LOW);
+  digitalWrite(MOTOR2_EN, LOW);
+
+  Serial.println("Motors Ready");
+  Serial.println("1: Motor 1 CW 90 degrees");
+  Serial.println("2: Motor 1 CCW 90 degrees");
+  Serial.println("3: Motor 2 CW 90 degrees");
+  Serial.println("4: Motor 2 CCW 90 degrees");
+}
+
+// 지정한 모터를 지정한 방향으로 회전
+void rotateMotor(int stpPin, int dirPin, bool clockwise) {
+
+  // 회전 방향 설정
+  digitalWrite(dirPin, clockwise ? HIGH : LOW);
+  delay(10);
+
+  // 90도 회전
+  for (int i = 0; i < PULSES_90; i++) {
+    digitalWrite(stpPin, LOW);
+    delayMicroseconds(PULSE_US);
+
+    digitalWrite(stpPin, HIGH);
+    delayMicroseconds(PULSE_US);
+  }
+}
+
+void loop() {
+
+  if (Serial.available() > 0) {
+
+    char command = Serial.read();
+
+    switch (command) {
+
+      case '1':
+        Serial.println("Motor 1 CW 90 degrees");
+        rotateMotor(MOTOR1_STP, MOTOR1_DIR, true);
+        Serial.println("Done");
+        break;
+
+      case '2':
+        Serial.println("Motor 1 CCW 90 degrees");
+        rotateMotor(MOTOR1_STP, MOTOR1_DIR, false);
+        Serial.println("Done");
+        break;
+
+      case '3':
+        Serial.println("Motor 2 CW 90 degrees");
+        rotateMotor(MOTOR2_STP, MOTOR2_DIR, true);
+        Serial.println("Done");
+        break;
+
+      case '4':
+        Serial.println("Motor 2 CCW 90 degrees");
+        rotateMotor(MOTOR2_STP, MOTOR2_DIR, false);
+        Serial.println("Done");
+        break;
+    }
+  }
+}
